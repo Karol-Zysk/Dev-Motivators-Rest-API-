@@ -1,27 +1,23 @@
-import { Request, Response } from "express";
-import Motivator from "../models/motivator.model";
+import { NextFunction, Request, Response } from "express";
+import { AppError } from "../utils/app.error";
+import Motivator, { MotivatorDocument, Place } from "../models/motivator.model";
 import { APIFeatures } from "../utils/apiFeatures";
 import { catchAsync } from "../utils/catchAsync";
-import { getMotivators } from "./handlerFactory";
+import { getMotivators } from "./handler.factory";
 
 export const createMotivator = catchAsync(
   async (req: Request, res: Response) => {
-    const body = req.body;
+    const { title, subTitle, image }: MotivatorDocument = req.body;
     //Need to change this after testing !!!!
-    const motivator = await Motivator.create(body);
+    const motivator = await Motivator.create({ title, subTitle, image });
 
     return res.send(motivator);
   }
 );
 
-export const getAllMotivators = getMotivators();
-
-export const getMotivatorsMain = catchAsync(
+export const getAllMotivators = catchAsync(
   async (req: Request, res: Response) => {
-    const features = new APIFeatures(
-      Motivator.find({ place: "Main" }),
-      req.query
-    )
+    const features = new APIFeatures(Motivator.find(), req.query)
       .filter()
       .sort()
       .limitFields()
@@ -34,6 +30,52 @@ export const getMotivatorsMain = catchAsync(
       lenght: allMotivators.length,
       data: {
         allMotivators,
+      },
+    });
+  }
+);
+
+export const getMotivatorsMain = getMotivators(Place.main);
+export const getMotivatorsPurgatory = getMotivators(Place.purgatory);
+export const getMotivatorsWaiting = getMotivators(Place.waiting);
+
+export const getOneMotivator = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const motivatorId = req.params.id;
+    const motivator = await Motivator.findById(motivatorId);
+
+    if (!motivator) {
+      return next(new AppError(404, "There is no motivator with this id"));
+    }
+    res.status(200).json({
+      status: "success",
+      data: {
+        motivator,
+      },
+    });
+  }
+);
+
+export const updateOneMotivator = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { title, subTitle, image }: MotivatorDocument = req.body;
+    const motivatorId = req.params.id;
+    const motivator = await Motivator.findByIdAndUpdate(
+      motivatorId,
+      { title, subTitle, image },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!motivator) {
+      return next(new AppError(404, "There is no motivator with this Id"));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        motivator,
       },
     });
   }

@@ -6,9 +6,9 @@ export enum Place {
   purgatory = "Purgatory",
 }
 
-export interface MotivatortiDocument extends mongoose.Document {
+export interface MotivatorDocument extends mongoose.Document {
   title: string;
-  subtitle: string;
+  subTitle: string;
   sluck: string;
   image: string;
   author: string;
@@ -36,6 +36,7 @@ const motivatorSchema = new mongoose.Schema(
     sluck: {
       type: String,
       required: true,
+      default: "sluck",
     },
     image: {
       type: String,
@@ -44,6 +45,7 @@ const motivatorSchema = new mongoose.Schema(
     author: {
       type: String,
       required: true,
+      default: "Anonymus",
     },
     thumbUp: {
       type: Number,
@@ -75,7 +77,7 @@ const motivatorSchema = new mongoose.Schema(
   }
 );
 
-const Motivator = mongoose.model<MotivatortiDocument>(
+const Motivator = mongoose.model<MotivatorDocument>(
   "Motivator",
   motivatorSchema
 );

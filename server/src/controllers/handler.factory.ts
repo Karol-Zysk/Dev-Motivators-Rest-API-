@@ -3,8 +3,8 @@ import Motivator, { Place } from "../models/motivator.model";
 import { APIFeatures } from "../utils/apiFeatures";
 import { catchAsync } from "../utils/catchAsync";
 
-export const getMotivators = (place?: Place) =>
-  catchAsync(async (req: Request, res: Response) => {
+export const getMotivators = (place: Place) => {
+  return catchAsync(async (req: Request, res: Response) => {
     const features = new APIFeatures(Motivator.find({ place }), req.query)
       .filter()
       .sort()
@@ -21,3 +21,4 @@ export const getMotivators = (place?: Place) =>
       },
     });
   });
+};
