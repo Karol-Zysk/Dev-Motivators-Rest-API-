@@ -1,19 +1,33 @@
-import { Request, Response, NextFunction } from "express";
-import { AnyZodObject } from "zod";
+import { NextFunction, Request, Response } from "express";
+import * as Yup from "yup";
 
-const validate =
-  (schema: AnyZodObject) =>
-  (req: Request, res: Response, next: NextFunction) => {
-    try {
-      schema.parse({
-        body: req.body,
-        query: req.query,
-        params: req.params,
-      });
-      next();
-    } catch (e: any) {
-      return res.status(400).send(e.errors);
-    }
-  };
+const formSchema = Yup.object({
+  login: Yup.string()
+    .required("Username required")
+    .min(5, "Username too short")
+    .max(20, "Username too long"),
+  password: Yup.string()
+    .required("Password required")
+    .min(5, "Password too short")
+    .max(20, "Password too long"),
+});
 
-export default validate;
+export const validateForm = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const formData = req.body;
+  formSchema
+    .validate(formData)
+    .then((valid) => {
+      if (valid) {
+        console.log(valid);
+        return next();
+      }
+    })
+    .catch((err) => {
+      console.log(err.errors);
+      return res.status(422).send(err.errors);
+    });
+};

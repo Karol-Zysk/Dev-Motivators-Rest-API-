@@ -7,6 +7,8 @@ import {
   getMotivatorsWaiting,
   getOneMotivator,
   updateOneMotivator,
+  deleteOneMotivator,
+  deleteAllMotivators,
 } from "../controllers/motivator.controller";
 
 const router = express.Router();
@@ -16,7 +18,8 @@ router
   .post(createMotivator)
 
   //Motivators in Purgatory and on Main Page
-  .get(getAllMotivators);
+  .get(getAllMotivators)
+  .delete(deleteAllMotivators);
 
 //Motivators on Main Page
 router.get("/getMotivatorsMain", getMotivatorsMain);
@@ -25,6 +28,10 @@ router.get("/getMotivatorsPurgatory", getMotivatorsPurgatory);
 //Motivators waiting to be accepted
 router.get("/getMotivatorsWaiting", getMotivatorsWaiting);
 
-router.route("/:id").get(getOneMotivator).patch(updateOneMotivator);
+router
+  .route("/:id")
+  .get(getOneMotivator)
+  .patch(updateOneMotivator)
+  .delete(deleteOneMotivator);
 
 export default router;

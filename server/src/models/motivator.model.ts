@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 export enum Place {
   main = "Main",
@@ -33,10 +34,8 @@ const motivatorSchema = new mongoose.Schema(
       required: true,
       maxLength: [999, "Subtitle must have less than or equal 40 characters"],
     },
-    sluck: {
+    slug: {
       type: String,
-      required: true,
-      default: "sluck",
     },
     image: {
       type: String,
@@ -63,7 +62,6 @@ const motivatorSchema = new mongoose.Schema(
       type: String,
       enum: {
         values: [Place.main, Place.purgatory, Place.waiting],
-        message: "allowed options: Main, Waiting, Purgatory",
       },
       default: Place.waiting,
     },
@@ -76,6 +74,10 @@ const motivatorSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+motivatorSchema.pre("save", function () {
+  this.slug = slugify(this.title, { lower: true });
+});
 
 const Motivator = mongoose.model<MotivatorDocument>(
   "Motivator",
