@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import slugify from "slugify";
 
 export enum Place {
@@ -12,12 +12,12 @@ export interface MotivatorDocument extends mongoose.Document {
   subTitle: string;
   sluck: string;
   image: string;
-  author: string;
-  thumbUp: number;
-  thumbDown: number;
+  thumbUp: string[];
+  thumbDown: string[];
   place: Place;
   createdAt: Date;
   updatedAt: Date;
+  author: Schema.Types.ObjectId;
   keyWords: string[];
   safeIn: number;
 }
@@ -41,21 +41,10 @@ const motivatorSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    author: {
-      type: String,
-      required: true,
-      default: "Anonymus",
-    },
-    thumbUp: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    thumbDown: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
+
+    thumbUp: [{ type: Schema.Types.ObjectId, ref: "User" }],
+
+    thumbDown: [{ type: Schema.Types.ObjectId, ref: "User" }],
     createdAt: { type: Date, default: Date.now() },
     updatedAt: { type: Date },
     place: {
@@ -68,6 +57,11 @@ const motivatorSchema = new mongoose.Schema(
     keyWords: {
       type: [String],
     },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Motivator must belong to a user"],
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -77,6 +71,15 @@ const motivatorSchema = new mongoose.Schema(
 
 motivatorSchema.pre("save", function () {
   this.slug = slugify(this.title, { lower: true });
+});
+
+motivatorSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "author",
+    options: { select: "login" },
+  });
+
+  next();
 });
 
 const Motivator = mongoose.model<MotivatorDocument>(

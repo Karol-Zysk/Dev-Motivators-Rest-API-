@@ -19,6 +19,11 @@ export interface UserDocument extends mongoose.Document {
   createdAt: Date;
   updatedAt: Date;
   active: boolean;
+  correctPassword: (
+    candidatePassword: string,
+    userPassword: string | undefined
+  ) => boolean;
+  changedPassword: (JWTTimestamp: number) => Promise<boolean>;
 }
 
 const userSchema = new mongoose.Schema(
@@ -103,6 +108,24 @@ userSchema.pre(
     this.passwordConfirm = undefined;
   }
 );
+
+userSchema.methods.correctPassword = async function (
+  candidatePassword: string,
+  userPassword: string
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPassword = async function (JWTTimestamp: number) {
+  if (this.passwordChangedAt) {
+    let changedTimeStamp = this.passwordChangedAt.getTime() / 1000;
+    changedTimeStamp = parseInt(changedTimeStamp.toString(), 10);
+
+    return JWTTimestamp < changedTimeStamp;
+  }
+
+  return false;
+};
 
 const User = mongoose.model<UserDocument>("User", userSchema);
 

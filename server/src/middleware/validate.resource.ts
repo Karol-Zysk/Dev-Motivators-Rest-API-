@@ -22,12 +22,10 @@ export const validateForm = (
     .validate(formData)
     .then((valid) => {
       if (valid) {
-        console.log(valid);
         return next();
       }
     })
     .catch((err) => {
-      console.log(err.errors);
       return res.status(422).send(err.errors);
     });
 };

@@ -4,13 +4,30 @@ import Motivator, { MotivatorDocument, Place } from "../models/motivator.model";
 import { APIFeatures } from "../utils/apiFeatures";
 import { catchAsync } from "../utils/catchAsync";
 import { getMotivators } from "./handler.factory";
-import  { isValidObjectId } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
+import log from "../utils/logger";
+
+export const setTourUserIDs = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.body.motivator) req.body.motivator = req.params.id;
+  if (!req.body.author) req.body.author = res.locals.user._id;
+
+  next();
+};
 
 export const createMotivator = catchAsync(
   async (req: Request, res: Response) => {
-    const { title, subTitle, image }: MotivatorDocument = req.body;
+    const { title, subTitle, image, author }: MotivatorDocument = req.body;
     //Need to change this after testing !!!!
-    const motivator = await Motivator.create({ title, subTitle, image });
+    const motivator = await Motivator.create({
+      title,
+      subTitle,
+      image,
+      author,
+    });
 
     return res.send(motivator);
   }
@@ -40,7 +57,7 @@ export const getMotivatorsMain = getMotivators(Place.main);
 export const getMotivatorsPurgatory = getMotivators(Place.purgatory);
 export const getMotivatorsWaiting = getMotivators(Place.waiting);
 
-export const getOneMotivator = catchAsync(
+export const getMotivator = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const motivatorId = req.params.id;
     if (!isValidObjectId(motivatorId)) {
@@ -61,10 +78,13 @@ export const getOneMotivator = catchAsync(
   }
 );
 
-export const updateOneMotivator = catchAsync(
+export const updateMotivator = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { title, subTitle, image }: MotivatorDocument = req.body;
     const motivatorId = req.params.id;
+
+    //IF CURRENT USER IS AUTHOR THEN LET HIM UPDATE
+    const { title, subTitle, image }: MotivatorDocument = req.body;
+
     const motivator = await Motivator.findByIdAndUpdate(
       motivatorId,
       { title, subTitle, image },
@@ -86,7 +106,7 @@ export const updateOneMotivator = catchAsync(
   }
 );
 
-export const deleteOneMotivator = catchAsync(
+export const deleteMotivator = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const motivatorId = req.params.id;
     const motivator = await Motivator.findByIdAndDelete(motivatorId);
@@ -111,3 +131,26 @@ export const deleteAllMotivators = catchAsync(
     });
   }
 );
+
+export const giveThumbUp = catchAsync(async (req: Request, res: Response) => {
+  Motivator.findByIdAndUpdate(req.params.id, {
+    $push: { thumbUp: String(res.locals.user.id) },
+  }).exec((err, result) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    } else {
+      res.json(result);
+    }
+  });
+});
+export const undoThumbUp = (elo:string ="5")  = catchAsync(async (req: Request, res: Response) => {
+  Motivator.findByIdAndUpdate(req.params.id, {
+    [ && "$push" ]: { thumbUp: String(res.locals.user.id) },
+  }).exec((err, result) => {
+    if (err) {
+      return res.status(422).json({ error: err });
+    } else {
+      res.json(result);
+    }
+  });
+});
