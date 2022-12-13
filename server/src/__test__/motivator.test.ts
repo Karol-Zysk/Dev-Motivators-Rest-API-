@@ -8,6 +8,7 @@ import Motivator from "../models/motivator.model";
 const app = createServer();
 
 const userId = new mongoose.Types.ObjectId().toString();
+const motivatorId = new mongoose.Types.ObjectId().toString();
 
 const userPayload = {
   _id: userId,
@@ -18,6 +19,7 @@ const userPayload = {
 };
 
 const motivatorPayload = {
+  _id: motivatorId,
   title: "Test Motivator",
   subTitle: "Some text in subtitle",
   author: userId,
@@ -35,6 +37,13 @@ describe("motivator tests", () => {
     const mongoServer = await MongoMemoryServer.create();
 
     await mongoose.connect(mongoServer.getUri());
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {
@@ -125,6 +134,71 @@ describe("motivator tests", () => {
       thumbDown: [],
       thumbUp: [],
       title: "Test Motivator",
+    });
+  });
+  describe("Voting System", () => {
+    it("PUT /givethumbup/:motivatorId  should return status 200 and vote if user logged in and didn't vote yet", async () => {
+      const response = await supertest(app)
+        .post("/api/v1/users/login")
+        .send(userPayload);
+
+      const {
+        body: {
+          data: {
+            user: { id },
+          },
+          token: jwt,
+        },
+      } = response;
+      await supertest(app)
+        .post("/api/v1/motivators")
+        .set("Authorization", `Bearer ${jwt}`)
+        .send(motivatorPayload);
+
+      const { statusCode } = await supertest(app)
+        .put(`/api/v1/motivators/givethumbup/${motivatorPayload._id}`)
+        .set("Authorization", `Bearer ${jwt}`);
+
+      const {
+        body: {
+          data: {
+            motivator: { thumbUp },
+          },
+        },
+      } = await supertest(app).get(
+        `/api/v1/motivators/${motivatorPayload._id}`
+      );
+
+      expect(statusCode).toBe(200);
+      expect(thumbUp).toEqual([id]);
+    });
+    it("PUT /givethumbup/:motivatorId  should return status 403 if user is logged in and already voted", async () => {
+      const response = await supertest(app)
+        .post("/api/v1/users/login")
+        .send(userPayload);
+
+      const {
+        body: {
+          data: {
+            user: { id },
+          },
+          token: jwt,
+        },
+      } = response;
+      await supertest(app)
+        .post("/api/v1/motivators")
+        .set("Authorization", `Bearer ${jwt}`)
+        .send(motivatorPayload);
+      // First Vote
+      await supertest(app)
+        .put(`/api/v1/motivators/givethumbup/${motivatorPayload._id}`)
+        .set("Authorization", `Bearer ${jwt}`);
+      //Second Vote
+      const { statusCode } = await supertest(app)
+        .put(`/api/v1/motivators/givethumbup/${motivatorPayload._id}`)
+        .set("Authorization", `Bearer ${jwt}`);
+
+      expect(statusCode).toBe(403);
     });
   });
 });

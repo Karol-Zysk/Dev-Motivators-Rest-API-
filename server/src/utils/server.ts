@@ -19,7 +19,7 @@ function createServer() {
   }
 
   const limiter = rateLimit({
-    max: 10,
+    max: 30,
     windowMs: 5 * 60 * 1000,
     message: "Too many request from this IP, try again in 5 minutes!",
   });
