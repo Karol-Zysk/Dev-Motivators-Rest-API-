@@ -1,87 +1,130 @@
-// import supertest from "supertest";
-// import { MongoMemoryServer } from "mongodb-memory-server";
-// import mongoose from "mongoose";
-// import Motivator from "../models/motivator.model";
-// import createServer from "../utils/server";
+import supertest from "supertest";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import createServer from "../utils/server";
+import Motivator from "../models/motivator.model";
 
-// const app = createServer();
+const app = createServer();
 
-// const motivatorPayload = {
-//   title: "IIII like to play Idle Heroes",
-//   subTitle: "Fajne gry tworzył",
-//   author: true,
-//   image: "/images/John-Carmack",
-//   sluck: "elo-ziomki-yoyo",
-//   keyWords: "Elo",
-//   thumbUp: 19,
-//   place: "Purgatory",
-// };
+const userId = new mongoose.Types.ObjectId().toString();
 
-// describe("motivator tests", () => {
-//   beforeAll(async () => {
-//     const mongoServer = await MongoMemoryServer.create();
+const userPayload = {
+  _id: userId,
+  email: "Jane@example.com",
+  login: "Jane23",
+  password: "test1234",
+  passwordConfirm: "test1234",
+};
 
-//     await mongoose.connect(mongoServer.getUri());
-//   });
+const motivatorPayload = {
+  title: "Test Motivator",
+  subTitle: "Some text in subtitle",
+  author: userId,
+  image: "/images/John-Carmack",
+  sluck: "test-motivator",
+  keyWords: "Elo",
+  thumbUp: [],
+  thumbDown: [],
+  place: "Purgatory",
+};
 
-//   afterAll(async () => {
-//     await mongoose.disconnect();
-//     await mongoose.connection.close();
-//   });
-//   it("GET /  shuld return statusCode 200 and all motivators array", async () => {
-//     await Motivator.create(motivatorPayload);
-//     const { body } = await supertest(app).get("/api/v1/motivators").expect(200);
+describe("motivator tests", () => {
+  beforeAll(async () => {
+    app.use(cookieParser());
+    const mongoServer = await MongoMemoryServer.create();
 
-//     expect(body).toEqual({
-//       data: {
-//         allMotivators: [
-//           {
-//             _id: expect.any(String),
-//             author: "true",
-//             createdAt: expect.any(String),
-//             id: expect.any(String),
-//             image: "/images/John-Carmack",
-//             keyWords: ["Elo"],
-//             place: "Purgatory",
-//             slug: "iiii-like-to-play-idle-heroes",
-//             subTitle: "Fajne gry tworzył",
-//             thumbDown: 0,
-//             thumbUp: 19,
-//             title: "IIII like to play Idle Heroes",
-//           },
-//         ],
-//       },
-//       lenght: 1,
-//       status: "success",
-//     });
-//   });
-//   it("GET /:id  shuld return statusCode 404 if motivator with given Id doesen't exist", async () => {
-//     const motivatorId = 123;
-//     const { statusCode } = await supertest(app).get(
-//       `/api/v1/motivators/${motivatorId}`
-//     );
-//     expect(statusCode).toBe(404);
-//   });
-//   it("POST /  should return status 200 and create motivator if correct data", async () => {
-//     const { statusCode, body } = await supertest(app)
-//       .post("/api/v1/motivators/")
-//       .send(motivatorPayload);
+    await mongoose.connect(mongoServer.getUri());
+  });
 
-//     expect(statusCode).toBe(200);
-//     expect(body).toEqual({
-//       __v: 0,
-//       _id: expect.any(String),
-//       author: "Anonymus",
-//       createdAt: expect.any(String),
-//       id: expect.any(String),
-//       image: "/images/John-Carmack",
-//       keyWords: [],
-//       place: "Waiting",
-//       slug: "iiii-like-to-play-idle-heroes",
-//       subTitle: "Fajne gry tworzył",
-//       thumbDown: 0,
-//       thumbUp: 0,
-//       title: "IIII like to play Idle Heroes",
-//     });
-//   });
-// });
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoose.connection.close();
+  });
+  it("GET /  shuld return statusCode 200 and all motivators array", async () => {
+    await Motivator.create(motivatorPayload);
+    const { body } = await supertest(app).get("/api/v1/motivators").expect(200);
+
+    expect(body).toEqual({
+      data: {
+        allMotivators: [
+          {
+            _id: expect.any(String),
+            author: null,
+            createdAt: expect.any(String),
+            id: expect.any(String),
+            image: "/images/John-Carmack",
+            keyWords: ["Elo"],
+            place: expect.any(String),
+            slug: "test-motivator",
+            subTitle: "Some text in subtitle",
+            thumbDown: [],
+            thumbUp: [],
+            title: "Test Motivator",
+          },
+        ],
+      },
+      lenght: 1,
+      status: "success",
+    });
+  });
+  it("GET /:id  shuld return statusCode 404 if motivator with given Id doesen't exist", async () => {
+    const motivatorId = 123;
+    const { statusCode } = await supertest(app).get(
+      `/api/v1/motivators/${motivatorId}`
+    );
+    expect(statusCode).toBe(404);
+  });
+  it("POST /  should return status 401 and not create motivator when user is not logged in", async () => {
+    const { statusCode, body } = await supertest(app)
+      .post("/api/v1/motivators")
+      .send(motivatorPayload);
+
+    expect(statusCode).toBe(401);
+    expect(body).not.toEqual({
+      __v: 0,
+      _id: expect.any(String),
+      author: userPayload._id,
+      createdAt: expect.any(String),
+      id: expect.any(String),
+      image: "/images/John-Carmack",
+      keyWords: [],
+      place: expect.any(String),
+      slug: "test-motivator",
+      subTitle: "Some text in subtitle",
+      thumbDown: [],
+      thumbUp: [],
+      title: "Test Motivator",
+    });
+  });
+  it("POST /  should return status 201 and create motivator user is logged in", async () => {
+    const response = await supertest(app)
+      .post("/api/v1/users/signup")
+      .send(userPayload);
+
+    const {
+      body: { token: jwt },
+    } = response;
+    const { statusCode, body } = await supertest(app)
+      .post("/api/v1/motivators")
+      .set("Authorization", `Bearer ${jwt}`)
+      .send(motivatorPayload);
+
+    expect(statusCode).toBe(201);
+    expect(body).toEqual({
+      __v: 0,
+      _id: expect.any(String),
+      author: userPayload._id,
+      createdAt: expect.any(String),
+      id: expect.any(String),
+      image: "/images/John-Carmack",
+      keyWords: [],
+      place: expect.any(String),
+      slug: "test-motivator",
+      subTitle: "Some text in subtitle",
+      thumbDown: [],
+      thumbUp: [],
+      title: "Test Motivator",
+    });
+  });
+});

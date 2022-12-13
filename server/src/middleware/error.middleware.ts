@@ -15,6 +15,7 @@ const errorMiddleware = (
     log.error(
       `[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`
     );
+    
     res.status(status).json({ message });
   } catch (error) {
     next(error);

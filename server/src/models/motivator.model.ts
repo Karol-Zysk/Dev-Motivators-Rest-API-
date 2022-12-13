@@ -17,7 +17,7 @@ export interface MotivatorDocument extends mongoose.Document {
   place: Place;
   createdAt: Date;
   updatedAt: Date;
-  author: Schema.Types.ObjectId;
+  author: { id: Schema.Types.ObjectId };
   keyWords: string[];
   safeIn: number;
 }
@@ -52,7 +52,7 @@ const motivatorSchema = new mongoose.Schema(
       enum: {
         values: [Place.main, Place.purgatory, Place.waiting],
       },
-      default: Place.waiting,
+      default: Place.main,
     },
     keyWords: {
       type: [String],

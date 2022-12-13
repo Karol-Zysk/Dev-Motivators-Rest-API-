@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import Motivator from "../models/motivator.model";
+import Motivator, { MotivatorDocument } from "../models/motivator.model";
 import { AppError } from "../utils/app.error";
 import { catchAsync } from "../utils/catchAsync";
 import log from "../utils/logger";
@@ -8,8 +8,8 @@ import log from "../utils/logger";
 export const authorize = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const currentMotivator = await Motivator.findById(req.params.id);
-    const currentMotivatorObject = currentMotivator?.toObject();
-    log.info(String(currentMotivatorObject?.author.id) !== res.locals.user.id);
+
+    log.info(String(currentMotivator?.author.id) !== res.locals.user.id);
     // const userId = res.locals.user.id;
 
     if (!currentMotivator) {
@@ -17,7 +17,7 @@ export const authorize = catchAsync(
     }
 
     //CHEK IF CURRENT USER IS AUTHOR
-    if (String(currentMotivatorObject?.author.id) !== res.locals.user.id) {
+    if (String(currentMotivator?.author.id) !== res.locals.user.id) {
       return next(new AppError(404, `Current user is not an author`));
     }
     next();
@@ -32,7 +32,6 @@ export const checkIfAlreadyVoted = catchAsync(
     const disLike = motivator?.thumbDown.includes(res.locals.user.id);
 
     const voted = like || disLike;
-    log.info(voted);
 
     if (voted) {
       return res

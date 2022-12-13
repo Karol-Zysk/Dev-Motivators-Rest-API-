@@ -27,5 +27,6 @@ export const validateForm = (
     })
     .catch((err) => {
       return res.status(422).send(err.errors);
+      console.log(err.errors);
     });
 };

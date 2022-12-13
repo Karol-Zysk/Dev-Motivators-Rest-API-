@@ -5,8 +5,6 @@ import { catchAsync } from "../utils/catchAsync";
 import { createSendToken, verifyJwt } from "../utils/jwt.utils";
 import { CurrentUser } from "../interfaces/currentUser.interface";
 import { Role } from "../models/user.model";
-import Motivator, { MotivatorDocument } from "../models/motivator.model";
-import log from "../utils/logger";
 
 export const signUp = catchAsync(async (req: Request, res: Response) => {
   const { login, email, password, passwordConfirm } = req.body;
@@ -48,10 +46,10 @@ export const protect = catchAsync(
       req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
-    } else if (req.cookies.jwt) {
+    }
+     else if (req.cookies.jwt) {
       token = req.cookies.jwt;
     }
-
     if (!token) {
       return next(new AppError(401, "You are not logged in"));
     }
@@ -78,7 +76,7 @@ export const protect = catchAsync(
     }
     //GRANT ACCESS TO PROTECTED ROUTE
     //SET USER DATA TO USE IN MIDDLEWARE
-    res.locals.user = currentUser.toObject();
+    res.locals.user = currentUser;
 
     next();
   }
@@ -101,5 +99,3 @@ export const restrictTo = (...roles: Role[]) => {
     next();
   };
 };
-
-
