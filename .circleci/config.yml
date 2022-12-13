@@ -2,7 +2,7 @@ version: 2.1
 
 jobs:
   build:
-    working_directory: ~/dev-motivators/server
+    working_directory: ~/server
     docker:
       - image: circleci/node
 
