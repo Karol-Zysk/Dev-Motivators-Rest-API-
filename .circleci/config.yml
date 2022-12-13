@@ -10,7 +10,7 @@ jobs:
       - checkout
 
       # Install TypeScript
-      - run: npm install -g typescript
+      - run: sudo npm install -g typescript
 
       # Install project dependencies
       - run: npm install
