@@ -6,6 +6,7 @@
   "scripts": {
     "start": "npm run build && node build/index.js",
     "build": "rimraf ./build && tsc",
+    "build:render": "npm install && tsc",
     "dev": "npx nodemon",
     "lint": "eslint . --ext .ts",
     "test": "jest"
