@@ -1,7 +1,12 @@
+imports:
+  - { resource: config.env }
+
 version: 2.1
 
 jobs:
   build:
+    environment:
+      RENDER_DEPLOY_LINK: ${RENDER_DEPLOY_LINK}
     docker:
       - image: circleci/node
 
