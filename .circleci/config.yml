@@ -19,3 +19,6 @@ jobs:
 
       # Run tests
       - run: npm run test
+
+      # Deploy on render
+      - run: curl ${RENDER_DEPLOY_LINK}
