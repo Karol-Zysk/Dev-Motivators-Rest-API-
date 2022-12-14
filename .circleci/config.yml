@@ -1,12 +1,9 @@
-imports:
-  - { resource: config.env }
-
 version: 2.1
 
 jobs:
   build:
     environment:
-      RENDER_DEPLOY_LINK: ${RENDER_DEPLOY_LINK}
+      DEPLOY_LINK: ${RENDER_DEPLOY_LINK}
     docker:
       - image: circleci/node
 
@@ -26,4 +23,4 @@ jobs:
       - run: npm run test
 
       # Deploy on render
-      - run: curl ${RENDER_DEPLOY_LINK}
+      - run: curl DEPLOY_LINK
