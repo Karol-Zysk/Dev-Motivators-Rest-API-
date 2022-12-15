@@ -52,7 +52,7 @@ const motivatorSchema = new mongoose.Schema(
       enum: {
         values: [Place.main, Place.purgatory, Place.waiting],
       },
-      default: Place.main,
+      default: Place.purgatory,
     },
     keyWords: {
       type: [String],
@@ -72,6 +72,8 @@ const motivatorSchema = new mongoose.Schema(
 motivatorSchema.pre("save", function () {
   this.slug = slugify(this.title, { lower: true });
 });
+
+
 
 motivatorSchema.pre(/^find/, function (next) {
   this.populate({

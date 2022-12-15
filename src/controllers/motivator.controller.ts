@@ -128,19 +128,22 @@ export enum VoteMethod {
 
 export const Vote = (option: VoteKind, method: string) =>
   catchAsync(async (req: Request, res: Response) => {
-    Motivator.findByIdAndUpdate(
+    const motivator = await Motivator.findByIdAndUpdate(
       req.params.id,
       {
         [`$${method}`]: { [`${option}`]: String(res.locals.user.id) },
       },
-      { new: true }
-    ).exec((err, result) => {
-      if (err) {
-        return res.status(422).json({ error: err });
-      } else {
-        res.json(result);
-      }
-    });
+      { new: true, runValidators: true }
+    );
+//
+    if (motivator && motivator.thumbUp.length === 2) {
+      await Motivator.findByIdAndUpdate(
+        req.params.id,
+        { place: Place.main },
+        { new: true, runValidators: true }
+      );
+    }
+    res.status(200).json({ motivator });
   });
 
 export const getMotivatorsMain = getMotivators(Place.main);
