@@ -127,7 +127,7 @@ describe("motivator tests", () => {
       createdAt: expect.any(String),
       id: expect.any(String),
       image: "/images/John-Carmack",
-      keyWords: [],
+      keyWords: expect.any(Array),
       place: expect.any(String),
       slug: "test-motivator",
       subTitle: "Some text in subtitle",
