@@ -8,13 +8,15 @@ import { isValidObjectId } from "mongoose";
 
 export const createMotivator = catchAsync(
   async (req: Request, res: Response) => {
-    const { title, subTitle, image, author }: MotivatorDocument = req.body;
+    const { title, subTitle, image, author, keyWords }: MotivatorDocument =
+      req.body;
     //Need to change this after testing !!!!
     const motivator = await Motivator.create({
       title,
       subTitle,
       image,
       author,
+      keyWords,
     });
 
     return res.status(201).json(motivator);
@@ -126,16 +128,17 @@ export enum VoteMethod {
   take = "pull",
 }
 
-export const Vote = (option: VoteKind, method: string) =>
+export const vote = (option: VoteKind, method: string) =>
   catchAsync(async (req: Request, res: Response) => {
     const motivator = await Motivator.findByIdAndUpdate(
       req.params.id,
       {
         [`$${method}`]: { [`${option}`]: String(res.locals.user.id) },
+        movedToMain: Date.now(),
       },
       { new: true, runValidators: true }
     );
-//
+    //
     if (motivator && motivator.thumbUp.length === 2) {
       await Motivator.findByIdAndUpdate(
         req.params.id,
@@ -144,6 +147,19 @@ export const Vote = (option: VoteKind, method: string) =>
       );
     }
     res.status(200).json({ motivator });
+  });
+
+export const accept = (place: Place) =>
+  catchAsync(async (req: Request, res: Response) => {
+    const motivatorId = req.params.id;
+    const motivator = await Motivator.findByIdAndUpdate(
+      motivatorId,
+      { place: `${place}`, accepted: Date.now() },
+      { new: true, runValidators: true }
+    );
+    res
+      .status(200)
+      .json({ message: "Motivator moved out from 'Waiting'", motivator });
   });
 
 export const getMotivatorsMain = getMotivators(Place.main);

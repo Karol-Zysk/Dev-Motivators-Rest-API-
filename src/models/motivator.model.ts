@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import slugify from "slugify";
+import { convertMilliseconds } from "../utils/milisecondsToTime";
 
 export enum Place {
   main = "Main",
@@ -17,6 +18,8 @@ export interface MotivatorDocument extends mongoose.Document {
   place: Place;
   createdAt: Date;
   updatedAt: Date;
+  accepted: Date;
+  movedToMain: Date;
   author: { id: Schema.Types.ObjectId };
   keyWords: string[];
   safeIn: number;
@@ -47,12 +50,14 @@ const motivatorSchema = new mongoose.Schema(
     thumbDown: [{ type: Schema.Types.ObjectId, ref: "User" }],
     createdAt: { type: Date, default: Date.now() },
     updatedAt: { type: Date },
+    accepted: { type: Date },
+    movedToMain: { type: Date },
     place: {
       type: String,
       enum: {
         values: [Place.main, Place.purgatory, Place.waiting],
       },
-      default: Place.purgatory,
+      default: Place.waiting,
     },
     keyWords: {
       type: [String],
@@ -69,11 +74,18 @@ const motivatorSchema = new mongoose.Schema(
   }
 );
 
+motivatorSchema
+  .virtual("safeIn")
+  .get(function (this: { accepted: Date; movedToMain: Date }) {
+    if (this.accepted && this.movedToMain) {
+      const safein = Number(this.movedToMain) - Number(this.accepted);
+      return convertMilliseconds(safein);
+    }
+  });
+
 motivatorSchema.pre("save", function () {
   this.slug = slugify(this.title, { lower: true });
 });
-
-
 
 motivatorSchema.pre(/^find/, function (next) {
   this.populate({

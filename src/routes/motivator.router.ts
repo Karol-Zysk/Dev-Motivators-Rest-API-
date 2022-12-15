@@ -10,11 +10,13 @@ import {
   getMotivator,
   updateMotivator,
   deleteMotivator,
-  Vote,
+  vote,
   VoteKind,
   VoteMethod,
+  accept,
 } from "../controllers/motivator.controller";
 import { setUserId } from "../middleware/motivator.middleware";
+import { Place } from "../models/motivator.model";
 import { Role } from "../models/user.model";
 import { authorize, checkIfAlreadyVoted } from "../services/motivator.service";
 
@@ -54,18 +56,25 @@ router
 router
   .route("/givethumbup/:id")
   // Give Like
-  .put(protect, checkIfAlreadyVoted, Vote(VoteKind.thumbUp, VoteMethod.give));
+  .put(protect, checkIfAlreadyVoted, vote(VoteKind.thumbUp, VoteMethod.give));
 router
   // Undo Like
   .route("/undothumbup/:id")
   // Give DisLike
-  .put(protect, Vote(VoteKind.thumbUp, VoteMethod.take));
+  .put(protect, vote(VoteKind.thumbUp, VoteMethod.take));
 router
   // Undo DisLike
   .route("/givethumbdown/:id")
-  .put(protect, checkIfAlreadyVoted, Vote(VoteKind.thumbDown, VoteMethod.give));
+  .put(protect, checkIfAlreadyVoted, vote(VoteKind.thumbDown, VoteMethod.give));
 router
   .route("/undothumbdown/:id")
-  .put(protect, Vote(VoteKind.thumbDown, VoteMethod.take));
+  .put(protect, vote(VoteKind.thumbDown, VoteMethod.take));
+
+router.put(
+  "/accept/:id",
+  protect,
+  restrictTo(Role.admin, Role.moderator),
+  accept(Place.purgatory)
+);
 
 export default router;
