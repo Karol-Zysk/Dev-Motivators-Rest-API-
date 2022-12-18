@@ -12,7 +12,7 @@ import hpp from "hpp";
 
 function createServer() {
   const app = express();
-  app.options("*", cors());
+  app.use(cors({ origin: `*`, credentials: true }));
   app.use(helmet());
   if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
