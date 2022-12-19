@@ -36,6 +36,39 @@ export const login = catchAsync(
   }
 );
 
+export const isLoggedIn = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (req.cookies.jwt) {
+      //verify token
+      const { decoded } = verifyJwt(req.cookies.jwt);
+
+      const currentUser = await User.findById((<CurrentUser>decoded).id);
+      if (!currentUser) {
+        return next();
+      }
+      //set promise to variable to return only boolean value
+      const isPasswordChanged = await currentUser.changedPassword(
+        (<CurrentUser>decoded).iat
+      );
+
+      if (isPasswordChanged) {
+        return next();
+      }
+      //GRANT ACCESS TO PROTECTED ROUTE
+      //SET USER DATA TO USE IN MIDDLEWARE
+      res.locals.user = currentUser;
+      return next();
+    }
+  } catch (err) {
+    return next();
+  }
+  return next();
+};
+
 export const protect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     //Check if there is token
@@ -46,8 +79,7 @@ export const protect = catchAsync(
       req.headers.authorization.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
-    }
-     else if (req.cookies.jwt) {
+    } else if (req.cookies.jwt) {
       token = req.cookies.jwt;
     }
     if (!token) {
@@ -99,3 +131,16 @@ export const restrictTo = (...roles: Role[]) => {
     next();
   };
 };
+
+export const profile = catchAsync(async (req: Request, res: Response) => {
+  const token = req.headers["x-access-token"];
+  console.log(token);
+
+  let user;
+  if (token) {
+    user = verifyJwt(token as string);
+  }
+
+  // Return the user's profile
+  res.json({ user });
+});

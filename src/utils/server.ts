@@ -12,8 +12,7 @@ import hpp from "hpp";
 
 function createServer() {
   const app = express();
-  app.use(cors({ origin: `*`, credentials: true }));
-  app.use(helmet());
+  app.use(helmet({}));
   if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
   }
@@ -30,7 +29,13 @@ function createServer() {
   app.use(urlencoded({ extended: true, limit: "10kb" }));
   app.use(cookieParser());
 
-  //Data sanitization against NoSQL  data injection
+  app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
+
   app.use(mongoSanitize());
   //Prevent parametr polution
   app.use(
