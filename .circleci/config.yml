@@ -13,7 +13,7 @@ jobs:
       - run: sudo npm install -g typescript
 
       # Install project dependencies
-      - run: npm install
+      - run: npm install --prefix server
 
       # Compile TypeScript source code
       - run: npm run build
