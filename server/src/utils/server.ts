@@ -17,13 +17,13 @@ function createServer() {
     app.use(morgan("dev"));
   }
 
-  const limiter = rateLimit({
-    max: 30,
-    windowMs: 5 * 60 * 1000,
-    message: "Too many request from this IP, try again in 5 minutes!",
-  });
+  // const limiter = rateLimit({
+  //   max: 30,
+  //   windowMs: 5 * 60 * 1000,
+  //   message: "Too many request from this IP, try again in 5 minutes!",
+  // });
 
-  app.use("/api", limiter);
+  // app.use("/api", limiter);
 
   app.use(express.json({ limit: "10kb" }));
   app.use(urlencoded({ extended: true, limit: "10kb" }));

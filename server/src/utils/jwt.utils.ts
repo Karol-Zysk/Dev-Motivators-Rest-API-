@@ -25,11 +25,11 @@ export const createSendToken = (
         Number(`${process.env.JWT_COOKIE_EXPIRES_IN}`) * 24 * 60 * 60 * 1000
     ),
     secure: true,
-    httpOnly: false,
+    httpOnly: true,
   };
 
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
-
+  // res.setHeader("Set-Cookie", `jwt=${token}; Path=/; Domain=localhost`);
   res.cookie("jwt", token, cookieOptions);
   //Remove password from output
   user.password = undefined;

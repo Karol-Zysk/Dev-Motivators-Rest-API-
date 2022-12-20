@@ -133,13 +133,17 @@ export const restrictTo = (...roles: Role[]) => {
 };
 
 export const profile = catchAsync(async (req: Request, res: Response) => {
-  const token = req.headers["x-access-token"];
-  console.log(token);
+  let token;
+  if (req.headers.authorization) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   let user;
   if (token) {
-    user = verifyJwt(token as string);
+    user = verifyJwt(token);
   }
+
+  console.log(req.headers);
 
   // Return the user's profile
   res.json({ user });
