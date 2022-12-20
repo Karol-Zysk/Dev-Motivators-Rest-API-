@@ -1,9 +1,6 @@
 "use client";
-
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import theme from "styles/theme";
-
-
 
 export default function Layout({
   children, // will be a page or nested layout

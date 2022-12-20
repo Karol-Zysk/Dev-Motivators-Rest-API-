@@ -1,14 +1,10 @@
-"use client";
-import UserContext from "context/AccountContext";
 import SignUpPanel from "./SignUpPanel";
 
-const Login = () => {
+const SignUp = () => {
   return (
     <div>
-      <UserContext>
-        <SignUpPanel />
-      </UserContext>
+      <SignUpPanel />
     </div>
   );
 };
-export default Login;
+export default SignUp;

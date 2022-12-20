@@ -1,54 +1,11 @@
+"use client";
+
 import cookie from "js-cookie";
 import { Button, ButtonGroup, Heading, Text, VStack } from "@chakra-ui/react";
 import * as Yup from "yup";
 import { Form, Formik } from "formik";
 import { useRouter } from "next/navigation";
 import TextField from "../../components/TextField";
-import { getCookies } from "cookies-next";
-
-export const getProfile = async () => {
-  //@ts-ignore
-  const token = getCookies("cookie");
-
-  let headers = new Headers();
-  headers.append("Content-Type", "application/json");
-  headers.append("Accept", "application/json");
-  headers.append("Origin", "http://localhost:3000");
-  headers.append("Authorization", `Bearer ${token.cookie}`);
-
-  //@ts-ignore
-  return fetch("http://127.0.0.1:4000/api/v1/motivators/getMyMotivators", {
-    headers: headers,
-    method: "GET",
-    credentials: "include",
-    cache: "no-store",
-  })
-    .then((res) => {
-      return res.json();
-    })
-    .then((res) => {
-      console.log(res);
-
-      return res.data;
-    });
-};
-
-async function getUserName() {
-  try {
-    // Pobierz dane profilu użytkownika za pomocą funkcji getProfile
-    const profile = await getProfile();
-
-    // Pobierz imię użytkownika
-    // const { firstName } = profile;
-
-    // Przypisz imię do zmiennej
-    // const userName = firstName;
-
-    return profile;
-  } catch (error) {
-    console.error(error);
-  }
-}
 
 const LoginPanel = () => {
   const router = useRouter();
@@ -91,14 +48,13 @@ const LoginPanel = () => {
             return res.json();
           })
           .then((data) => {
-            cookie.set("cookie", data.token, { expires: 700000 });
-            getUserName();
             if (!data) return;
 
             // if (data.status) {
             //   setError(data.status);
             // } Add better error handling on backend
             if (data.token) {
+              cookie.set("cookie", data.token, { expires: 700000 });
               router.push("/");
             }
           });

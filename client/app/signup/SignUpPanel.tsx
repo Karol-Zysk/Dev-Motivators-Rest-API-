@@ -1,17 +1,13 @@
 "use client";
-
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import { Button, ButtonGroup, Heading, Text, VStack } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
-import { AccountContext } from "../../context/AccountContext";
 import * as Yup from "yup";
 import TextField from "../../components/TextField";
+import cookie from "js-cookie";
 
 const SignUp = () => {
-  const { setUser } = useContext(AccountContext);
-  const [error, setError] = useState(null);
   const router = useRouter();
   return (
     <Formik
@@ -52,7 +48,7 @@ const SignUp = () => {
           method: "POST",
           credentials: "include",
           cache: "no-store",
-          
+
           body: JSON.stringify(vals),
         })
           .catch((err) => {
@@ -67,11 +63,11 @@ const SignUp = () => {
           })
           .then((data) => {
             if (!data) return;
-            setUser({ loggedIn: true });
             // if (data.status) {
             //   setError(data.status);
             // } Add better error handling on backend
-            if (data.loggedIn) {
+            if (data.token) {
+              cookie.set("cookie", data.token, { expires: 700000 });
               router.push("/");
             }
           });
@@ -87,7 +83,7 @@ const SignUp = () => {
       >
         <Heading>Sign Up</Heading>
         <Text as="p" color="red.500">
-          {error}
+          {"elo"}
         </Text>
         <TextField
           name="login"

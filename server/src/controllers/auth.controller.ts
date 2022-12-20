@@ -42,9 +42,9 @@ export const isLoggedIn = async (
   next: NextFunction
 ) => {
   try {
-    if (req.cookies.jwt) {
+    if (req.headers.authorization) {
       //verify token
-      const { decoded } = verifyJwt(req.cookies.jwt);
+      const { decoded } = verifyJwt(req.headers.authorization.split(" ")[1]);
 
       const currentUser = await User.findById((<CurrentUser>decoded).id);
       if (!currentUser) {
@@ -143,8 +143,6 @@ export const profile = catchAsync(async (req: Request, res: Response) => {
     user = verifyJwt(token);
   }
 
-  console.log(req.headers);
-
   // Return the user's profile
-  res.json({ user });
+  res.json({ user, profile: res.locals });
 });
