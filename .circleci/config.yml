@@ -16,10 +16,10 @@ jobs:
       - run: npm install --prefix server
 
       # Compile TypeScript source code
-      - run: npm run build
+      - run: npm run build --prefix server
 
       # Run tests
-      - run: npm run test
+      - run: npm run test --prefix server
 
       # Deploy on render
       - run: curl ${RENDER_DEPLOY_LINK}
