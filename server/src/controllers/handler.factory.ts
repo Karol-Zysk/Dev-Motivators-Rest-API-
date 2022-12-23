@@ -11,14 +11,12 @@ export const getMotivators = (place: Place) =>
       .limitFields()
       .paginate();
 
-    const Motivators = await features.query;
+    const motivators = await features.query;
 
     res.status(200).json({
       status: "success",
-      lenght: Motivators.length,
-      data: {
-        Motivators,
-      },
+      lenght: motivators.length,
+      motivators,
     });
   });
 
@@ -40,14 +38,12 @@ export const getUserMotivators = catchAsync(
       .limitFields()
       .paginate();
 
-    const Motivators = await features.query;
+    const motivators = await features.query;
 
     res.status(200).json({
       status: "success",
-      lenght: Motivators.length,
-      data: {
-        Motivators,
-      },
+      lenght: motivators.length,
+      motivators,
     });
   }
 );

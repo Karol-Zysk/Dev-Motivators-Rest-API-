@@ -9,7 +9,7 @@ const payload = {
     subtitle: string({
       required_error: "Subtitle is required",
     }).max(999, "Title must have less than or equal 999 characters"),
-    image: string({
+    photo: string({
       required_error: "Image is required",
     }),
   }),

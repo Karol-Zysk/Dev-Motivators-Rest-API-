@@ -9,12 +9,12 @@ const errorMiddleware = (
 ) => {
   try {
     const status: number = Number(error.status) || 500;
-    const message: string = error.message || "Something went wrong";
+    // const message: string = error || "Something went wrong";
     log.error(
-      `[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`
+      `[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${error.message}, stack: ${error.stack}`
     );
 
-    res.status(status).json({ message });
+    res.status(status).json({ error });
   } catch (error) {
     next(error);
   }

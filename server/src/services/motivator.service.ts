@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import Motivator, { MotivatorDocument } from "../models/motivator.model";
+import Motivator from "../models/motivator.model";
 import { AppError } from "../utils/app.error";
 import { catchAsync } from "../utils/catchAsync";
 import log from "../utils/logger";

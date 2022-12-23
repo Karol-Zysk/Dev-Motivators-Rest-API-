@@ -8,16 +8,9 @@ import { isValidObjectId } from "mongoose";
 
 export const createMotivator = catchAsync(
   async (req: Request, res: Response) => {
-    const { title, subTitle, image, author, keyWords }: MotivatorDocument =
-      req.body;
-    //Need to change this after testing !!!!
-    const motivator = await Motivator.create({
-      title,
-      subTitle,
-      image,
-      author,
-      keyWords,
-    });
+    // const { title, subTitle, author, keyWords, photo } = req.body;
+
+    const motivator = await Motivator.create(req.body);
 
     return res.status(201).json(motivator);
   }
@@ -31,13 +24,13 @@ export const getAllMotivators = catchAsync(
       .limitFields()
       .paginate();
 
-    const allMotivators = await features.query;
+    const motivators = await features.query;
 
     res.status(200).json({
       status: "success",
-      lenght: allMotivators.length,
+      lenght: motivators.length,
       data: {
-        allMotivators,
+        motivators,
       },
     });
   }
@@ -69,11 +62,11 @@ export const updateMotivator = catchAsync(
     const motivatorId = req.params.id;
 
     //IF CURRENT USER IS AUTHOR THEN LET HIM UPDATE
-    const { title, subTitle, image }: MotivatorDocument = req.body;
+    const { title, subTitle, photo }: MotivatorDocument = req.body;
 
     const motivator = await Motivator.findByIdAndUpdate(
       motivatorId,
-      { title, subTitle, image },
+      { title, subTitle, photo },
       {
         new: true,
         runValidators: true,

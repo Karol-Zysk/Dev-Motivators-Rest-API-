@@ -19,15 +19,22 @@ import { setUserId } from "../middleware/motivator.middleware";
 import { Place } from "../models/motivator.model";
 import { Role } from "../models/user.model";
 import { authorize, checkIfAlreadyVoted } from "../services/motivator.service";
+import { rateLimit } from "express-rate-limit";
 
 const router = express.Router();
 
+const createLimiter = rateLimit({
+  max: 10,
+  windowMs: 5 * 60 * 1000,
+  message: "You can create only motivator only one per 5 minutes",
+});
+
 router
   .route("/")
-  .post(protect, setUserId, createMotivator)
+  .post(protect, setUserId, createLimiter, createMotivator)
 
   //Motivators in Purgatory and on Main Page
-  .get(getAllMotivators);
+  .get(protect, restrictTo(Role.admin, Role.moderator), getAllMotivators);
 
 //Motivators on Main Page
 router.get("/getMotivatorsMain", getMotivatorsMain);
@@ -46,13 +53,13 @@ router.route("/getMyMotivators").get(protect, getUserMotivators);
 //User By Id
 router.route("/getUserMotivators/:id").get(protect, getUserMotivators);
 
-//Voting Routes
 router
   .route("/:id")
   .get(getMotivator)
   .patch(protect, authorize, updateMotivator)
   .delete(protect, authorize, deleteMotivator);
 
+//Voting Routes
 router
   .route("/givethumbup/:id")
   // Give Like

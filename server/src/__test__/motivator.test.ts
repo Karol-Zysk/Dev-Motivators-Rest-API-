@@ -23,7 +23,7 @@ const motivatorPayload = {
   title: "Test Motivator",
   subTitle: "Some text in subtitle",
   author: userId,
-  image: "/images/John-Carmack",
+  photo: "/photos/John-Carmack",
   sluck: "test-motivator",
   keyWords: "Elo",
   thumbUp: [],
@@ -50,32 +50,12 @@ describe("motivator tests", () => {
     await mongoose.disconnect();
     await mongoose.connection.close();
   });
-  it("GET /  shuld return statusCode 200 and all motivators array", async () => {
-    await Motivator.create(motivatorPayload);
-    const { body } = await supertest(app).get("/api/v1/motivators").expect(200);
+  it("GET /  shuld return statusCode 401 and no motivators if user is not admin or moderator. This endpoint contains all motivators, even waiting to accept", async () => {
+    await supertest(app).post("/api/v1/users/signup").send(userPayload);
 
-    expect(body).toEqual({
-      data: {
-        allMotivators: [
-          {
-            _id: expect.any(String),
-            author: null,
-            createdAt: expect.any(String),
-            id: expect.any(String),
-            image: "/images/John-Carmack",
-            keyWords: ["Elo"],
-            place: expect.any(String),
-            slug: "test-motivator",
-            subTitle: "Some text in subtitle",
-            thumbDown: [],
-            thumbUp: [],
-            title: "Test Motivator",
-          },
-        ],
-      },
-      lenght: 1,
-      status: "success",
-    });
+    await supertest(app)
+      .get("/api/v1/motivators")
+      .expect(401);
   });
   it("GET /:id  shuld return statusCode 404 if motivator with given Id doesen't exist", async () => {
     const motivatorId = 123;
@@ -96,7 +76,7 @@ describe("motivator tests", () => {
       author: userPayload._id,
       createdAt: expect.any(String),
       id: expect.any(String),
-      image: "/images/John-Carmack",
+      photo: "/photos/John-Carmack",
       keyWords: [],
       place: expect.any(String),
       slug: "test-motivator",
@@ -108,7 +88,7 @@ describe("motivator tests", () => {
   });
   it("POST /  should return status 201 and create motivator user is logged in", async () => {
     const response = await supertest(app)
-      .post("/api/v1/users/signup")
+      .post("/api/v1/users/login")
       .send(userPayload);
 
     const {
@@ -126,7 +106,7 @@ describe("motivator tests", () => {
       author: userPayload._id,
       createdAt: expect.any(String),
       id: expect.any(String),
-      image: "/images/John-Carmack",
+      photo: "/photos/John-Carmack",
       keyWords: expect.any(Array),
       place: expect.any(String),
       slug: "test-motivator",

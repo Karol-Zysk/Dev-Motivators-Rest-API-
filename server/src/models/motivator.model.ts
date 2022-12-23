@@ -12,7 +12,7 @@ export interface MotivatorDocument extends mongoose.Document {
   title: string;
   subTitle: string;
   sluck: string;
-  image: string;
+  photo: string;
   thumbUp: string[];
   thumbDown: string[];
   place: Place;
@@ -40,7 +40,7 @@ const motivatorSchema = new mongoose.Schema(
     slug: {
       type: String,
     },
-    image: {
+    photo: {
       type: String,
       required: true,
     },
