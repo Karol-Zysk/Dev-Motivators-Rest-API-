@@ -3,11 +3,8 @@ import "styles/globals.css";
 import { cookies } from "next/headers";
 
 export const getProfile = async () => {
-  //@ts-ignore
   const nextCookies = cookies();
   const token = nextCookies.get("cookie");
-  console.log(token);
-
   if (token) {
     let headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -15,16 +12,15 @@ export const getProfile = async () => {
     headers.append("Origin", "http://localhost:3000");
     headers.append("Authorization", `Bearer ${token.value}`);
 
-    const res = await fetch("http://127.0.0.1:4000/api/v1/users/profile", {
+    const res = await fetch("http://127.0.0.1:4001/api/v1/users/profile", {
       headers: headers,
       method: "GET",
       credentials: "include",
       cache: "no-store",
     });
     const data = await res.json();
-    console.log(data.profile.user.login);
 
-    return data.profile.user.login;
+    return data.profile.user;
   }
 };
 
@@ -33,33 +29,41 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const name = await getProfile();
-  console.log(name);
+  const data = await getProfile();
+
   return (
     <html>
       <head />
-      <body>
-        <header className="p-2 bg-gradient-to-b from-sky-200 to-sky-50 ">
+      <body className="w-full h-full min-h-screen">
+        <header className="flex items-center justify-between p-3 bg-gradient-to-b from-sky-900 to-slate-900 ">
+          <div className="flex h-full ">
+            <h1 className="block p-3 mt-auto mb-auto text-xl font-bold text-white shadow-sm shadow-black">
+              DevMotivators
+            </h1>
+          </div>
           <ul className="flex justify-end gap-10 m-4 text-lg">
-            <li className="text-sky-600">
+            <li className="font-bold text-white">
               <Link href={"/"}>Home</Link>
             </li>
-            <li className="text-sky-600">
+            <li className="font-bold text-white">
               <Link href={"/login"}>Login</Link>
             </li>
-            <li className="text-sky-600">
+            {data && (
+              <li className="font-bold text-white">
+                <Link href={"/createMotivator"}>Create Motivator</Link>
+              </li>
+            )}
+            <li className="font-bold text-white">
               <Link href={"/signup"}>Sign Up</Link>
             </li>
-            <li className="text-sky-600">
-              <h1>Hello {name}! </h1>
+            <li className="font-bold text-white">
+              <h1>Hello {data && data.login}! </h1>
             </li>
           </ul>
         </header>
-        {/* <ChakraProvider theme={theme}> */}
-        {/* <ColorModeScript initialColorMode={theme.config.initialColorMode}> */}
-        {children}
-        {/* </ColorModeScript> */}
-        {/* </ChakraProvider> */}
+        <main className="flex items-center justify-center w-full h-full p-4 bg-gradient-to-b from-black to-slate-900">
+          {children}
+        </main>
       </body>
     </html>
   );

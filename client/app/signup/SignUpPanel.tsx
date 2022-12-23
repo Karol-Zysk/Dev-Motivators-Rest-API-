@@ -43,7 +43,7 @@ const SignUp = () => {
         headers.append("Origin", "http://localhost:3000");
         alert(JSON.stringify(values, null, 2));
         actions.resetForm();
-        fetch("http://localhost:4000/api/v1/users/signup", {
+        fetch("http://localhost:4001/api/v1/users/signup", {
           headers: headers,
           method: "POST",
           credentials: "include",

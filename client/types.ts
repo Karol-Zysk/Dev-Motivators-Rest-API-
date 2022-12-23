@@ -2,7 +2,7 @@ export type MotivatorType = {
   _id: string;
   title: string;
   subTitle: string;
-  image: string;
+  photo: string;
   thumbUp: [string];
   thumbDown: [string];
   createdAt: Date;

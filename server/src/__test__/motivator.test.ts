@@ -3,7 +3,6 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import createServer from "../utils/server";
-import Motivator from "../models/motivator.model";
 
 const app = createServer();
 

@@ -14,7 +14,7 @@ const updateMotivator = async () => {
 
   //Update Motivator Function test with hardcoded values
 
-  fetch("http://localhost:4000/api/v1/motivators/63a1a42c2bd2b9c77573a526", {
+  fetch("http://localhost:4001/api/v1/motivators/63a1a42c2bd2b9c77573a526", {
     headers: headers,
     method: "PATCH",
     credentials: "include",
